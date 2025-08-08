@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCaml Sorting Visualizer - FIXED</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1><i class="fas fa-chart-bar"></i> OCaml Sorting Visualizer</h1>
+            <p>Interactive step-by-step visualization with dynamic array sizing</p>
+        </header>
+
+        <main class="main-content">
+            <div class="panel file-panel">
+                <h2><i class="fas fa-folder"></i> OCaml Files</h2>
+                <div class="file-upload-area">
+                    <input type="file" id="file-input" accept=".ml" multiple style="display: none;">
+                    <button id="add-file-btn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add OCaml File
+                    </button>
+                </div>
+                <div class="file-list" id="file-list"></div>
+                <div class="example-files">
+                    <h3>Example Algorithms</h3>
+                    <button class="btn btn-secondary example-btn" data-algorithm="bubble">Bubble Sort</button>
+                    <button class="btn btn-secondary example-btn" data-algorithm="quick">Quick Sort</button>
+                    <button class="btn btn-secondary example-btn" data-algorithm="merge">Merge Sort</button>
+                    <button class="btn btn-secondary example-btn" data-algorithm="selection">Selection Sort</button>
+                    <button class="btn btn-secondary example-btn" data-algorithm="insertion">Insertion Sort</button>
+                </div>
+            </div>
+
+            <div class="panel code-panel">
+                <h2><i class="fas fa-code"></i> OCaml Code Editor</h2>
+                <div class="editor-toolbar">
+                    <button id="compile-btn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Compile & Visualize
+                    </button>
+                    <button id="save-btn" class="btn btn-secondary">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <button id="format-btn" class="btn btn-secondary">
+                        <i class="fas fa-align-left"></i> Format
+                    </button>
+                    <span class="compilation-status" id="compilation-status"></span>
+                </div>
+                <div class="code-editor-container">
+                    <textarea id="code-editor" class="code-editor" placeholder="(* Write your OCaml sorting algorithm here *)
+let bubble_sort arr =
+  let n = Array.length arr in
+  for i = 0 to n - 2 do
+    for j = 0 to n - i - 2 do
+      if arr.(j) > arr.(j + 1) then begin
+        let temp = arr.(j) in
+        arr.(j) <- arr.(j + 1);
+        arr.(j + 1) <- temp
+      end
+    done
+  done;
+  arr"></textarea>
+                </div>
+                <div class="editor-info">
+                    <div class="error-panel" id="error-panel" style="display: none;">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Analysis Results</h4>
+                        <div id="error-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel visualization-panel">
+                <h2><i class="fas fa-chart-line"></i> Sorting Visualization</h2>
+                <div class="viz-controls">
+                    <div class="control-group">
+                        <label for="array-size">Array Size:</label>
+                        <input type="range" id="array-size" min="5" max="50" value="15" step="1">
+                        <span id="array-size-value">15</span>
+                    </div>
+                    <div class="control-group">
+                        <label for="animation-speed">Speed:</label>
+                        <input type="range" id="animation-speed" min="1" max="10" value="5" step="1">
+                        <span id="animation-speed-value">5</span>
+                    </div>
+                    <div class="control-group">
+                        <label for="array-type">Array Type:</label>
+                        <select id="array-type">
+                            <option value="random">Random</option>
+                            <option value="reverse">Reverse Sorted</option>
+                            <option value="nearly-sorted">Nearly Sorted</option>
+                            <option value="duplicates">Many Duplicates</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="playback-controls">
+                    <button id="play-btn" class="btn btn-success">
+                        <i class="fas fa-play"></i> Play
+                    </button>
+                    <button id="pause-btn" class="btn btn-warning" style="display: none;">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button id="step-back-btn" class="btn btn-info">
+                        <i class="fas fa-step-backward"></i> Step Back
+                    </button>
+                    <button id="step-forward-btn" class="btn btn-info">
+                        <i class="fas fa-step-forward"></i> Step Forward
+                    </button>
+                    <button id="reset-btn" class="btn btn-secondary">
+                        <i class="fas fa-refresh"></i> Reset
+                    </button>
+                </div>
+
+                <div class="visualization-container">
+                    <canvas id="visualization-canvas" width="800" height="400"></canvas>
+                </div>
+
+                <div class="step-info" id="step-info">
+                    <div class="step-counter">
+                        Step: <span id="current-step">0</span> / <span id="total-steps">0</span>
+                    </div>
+                    <div class="step-description" id="step-description">
+                        Ready to visualize. Adjust array size and click "Compile & Visualize".
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel analysis-panel">
+                <h2><i class="fas fa-analytics"></i> Algorithm Analysis</h2>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <h4>Comparisons</h4>
+                        <span id="comparison-count">0</span>
+                    </div>
+                    <div class="metric">
+                        <h4>Swaps/Moves</h4>
+                        <span id="swap-count">0</span>
+                    </div>
+                    <div class="metric">
+                        <h4>Array Accesses</h4>
+                        <span id="access-count">0</span>
+                    </div>
+                    <div class="metric">
+                        <h4>Time Complexity</h4>
+                        <span id="time-complexity">-</span>
+                    </div>
+                </div>
+
+                <div class="algorithm-explanation" id="algorithm-explanation">
+                    <h4>How it works:</h4>
+                    <p>Select an algorithm to see its explanation. Use the array size slider to test with different input sizes.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-cog fa-spin"></i>
+            <p>Analyzing OCaml code...</p>
+        </div>
+    </div>
+
+    <script src="js/ocaml-compiler.js"></script>
+    <script src="js/animation.js"></script>
+    <script src="js/file-manager.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/step-debugger.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
